@@ -4,9 +4,11 @@ Notepad app with JWT login system.
 
 ## Included technologies
 
+- [NodeJS](https://nodejs.org)
 - [Next](https://nextjs.org)
 - [Typescript](https://www.typescriptlang.org)
 - [Tailwind CSS](https://tailwindcss.com)
+- [Express](https://expressjs.com)
 
 ## License
 
