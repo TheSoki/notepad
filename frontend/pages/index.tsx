@@ -1,27 +1,6 @@
-import React from "react"
-import Head from 'next/head'
+import React from 'react'
+import Login from '../src/components/Login'
 
-const Homepage = () => (
-  <>
-    <Head>
-      <title>Notepad</title>
-      <link rel="icon" href="/favicon.ico" />
-    </Head>
-
-    <body className="flex min-h-screen flex-col">
-      <header>
-        <p>Header</p>
-      </header>
-
-      <main className="flex-1">
-        <p>Main</p>
-      </main>
-
-      <footer>
-        <p>Footer</p>
-      </footer>
-    </body>
-  </>
-)
+const Homepage = () => <Login />
 
 export default Homepage
