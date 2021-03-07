@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const bodyParser = require('body-parser')
 const jwt = require('jsonwebtoken')
+const Yup = require('yup')
 
 const app = express()
 const port = 5000
@@ -32,6 +33,17 @@ const notes = [
   },
 ]
 
+const LoginSchema = Yup.object().shape({
+  username: Yup.string()
+    .min(4, 'Too short!')
+    .max(64, 'Too long!')
+    .required('Mandatory'),
+  password: Yup.string()
+    .min(4, 'Too short!')
+    .max(64, 'Too long!')
+    .required('Mandatory'),
+})
+
 app.use(
   cors({
     origin: ['http://localhost:3000'],
@@ -56,8 +68,7 @@ const authToken = (req: any, res: any, next: any) => {
 }
 
 const generateAccessToken = (user: { name: string }) => {
-  return jwt.sign(user, ACCESS_TOKEN, { expiresIn: '90s' })
-  // zmenit na 30m
+  return jwt.sign(user, ACCESS_TOKEN, { expiresIn: '30m' })
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -70,22 +81,33 @@ app.post('/login', (req: any, res: any) => {
   const username = req.body.username
   const password = req.body.password
 
-  if (
-    notes.filter(
-      (note) => note.username === username && note.password === password,
-    ).length !== 0
-  ) {
-    console.log(username, password)
+  LoginSchema.isValid({
+    username: req.body.username,
+    password: req.body.password,
+  })
+    .then((valid: boolean) => {
+      if (valid) {
+        if (
+          notes.filter(
+            (note) => note.username === username && note.password === password,
+          ).length !== 0
+        ) {
+          const user = { name: username }
+          const accessToken = generateAccessToken(user)
+          const refreshToken = jwt.sign(user, REFRESH_TOKEN)
+          refreshTokens.push(refreshToken)
 
-    const user = { name: username }
-    const accessToken = generateAccessToken(user)
-    const refreshToken = jwt.sign(user, REFRESH_TOKEN)
-    refreshTokens.push(refreshToken)
-
-    res.json({ accessToken: accessToken, refreshToken: refreshToken })
-  } else {
-    res.sendStatus(401)
-  }
+          res.json({ accessToken: accessToken, refreshToken: refreshToken })
+        } else {
+          res.sendStatus(401)
+        }
+      } else {
+        res.sendStatus(400)
+      }
+    })
+    .catch(() => {
+      res.sendStatus(400)
+    })
 })
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -99,6 +121,12 @@ app.post('/token', (req: any, res: any) => {
     const accessToken = generateAccessToken({ name: user.name })
     res.json({ accessToken: accessToken })
   })
+})
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+app.post('/logout', (req: any, res: any) => {
+  refreshTokens = refreshTokens.filter((token) => token !== req.body.token)
+  res.sendStatus(204)
 })
 
 app.listen(port, () => {

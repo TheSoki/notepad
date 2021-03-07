@@ -3,6 +3,7 @@ import type { AppProps } from 'next/app'
 import '../src/styles/globals.css'
 import Head from 'next/head'
 import Link from 'next/link'
+import axios from 'axios'
 
 export const TokenContext = createContext(null)
 
@@ -33,6 +34,31 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
                   notes
                 </a>
               </Link>
+              <button
+                style={{ outline: 'none', border: 'none' }}
+                className="float-right"
+                onClick={() => {
+                  console.log(tokens.refreshToken)
+                  axios({
+                    method: 'post',
+                    url: `http://localhost:5000/logout`,
+                    data: {
+                      token: tokens.refreshToken,
+                    },
+                  })
+                    .then(() =>
+                      setTokens({
+                        accessToken: null,
+                        refreshToken: null,
+                      }),
+                    )
+                    .catch(() => alert('Bad request!'))
+                }}
+              >
+                <a className="mr-4 hover:text-salmon_fish border-almost_white hover:border-salmon_fish border-solid border-b-2">
+                  logout
+                </a>
+              </button>
             </header>
 
             <main className="flex-1 p-3">
