@@ -23,14 +23,6 @@ const notes = [
       { title: 'Buy cake!', description: 'But you dont need it.' },
     ],
   },
-  {
-    username: 'admin',
-    password: 'password',
-    notes: [
-      { title: 'Do your stuff!', description: 'You really should.' },
-      { title: null, description: null },
-    ],
-  },
 ]
 
 const LoginSchema = Yup.object().shape({
@@ -42,6 +34,19 @@ const LoginSchema = Yup.object().shape({
     .min(4, 'Too short!')
     .max(64, 'Too long!')
     .required('Mandatory'),
+})
+
+const NewNoteSchema = Yup.object().shape({
+  username: Yup.string()
+    .min(4, 'Too short!')
+    .max(64, 'Too long!')
+    .required('Mandatory'),
+  password: Yup.string()
+    .min(4, 'Too short!')
+    .max(64, 'Too long!')
+    .required('Mandatory'),
+  title: Yup.string().max(64, 'Too long!'),
+  description: Yup.string().max(500, 'Too long!'),
 })
 
 app.use(
@@ -151,6 +156,63 @@ app.post('/register', (req: any, res: any) => {
         } else {
           res.sendStatus(401)
         }
+      } else {
+        res.sendStatus(400)
+      }
+    })
+    .catch(() => {
+      res.sendStatus(400)
+    })
+})
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+app.post('/addnote', authToken, (req: any, res: any) => {
+  NewNoteSchema.isValid(req.body)
+    .then((valid: boolean) => {
+      if (valid) {
+        notes.forEach((note, index) => {
+          if (
+            note.username === req.body.username &&
+            note.password === req.body.password
+          ) {
+            notes[index].notes.push({
+              title: req.body.title,
+              description: req.body.description,
+            })
+          }
+        })
+        res.json(200)
+      } else {
+        res.sendStatus(400)
+      }
+    })
+    .catch(() => {
+      res.sendStatus(400)
+    })
+})
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+app.post('/deletenote', authToken, (req: any, res: any) => {
+  NewNoteSchema.isValid(req.body)
+    .then((valid: boolean) => {
+      if (valid) {
+        notes.forEach((user, index) => {
+          if (
+            user.username === req.body.username &&
+            user.password === req.body.password
+          ) {
+            user.notes.forEach((n) => {
+              if (
+                n.title === req.body.title &&
+                n.description === req.body.description
+              ) {
+                notes[index].notes = user.notes.filter((m) => m !== n)
+              }
+            })
+          }
+        })
+
+        res.json(200)
       } else {
         res.sendStatus(400)
       }

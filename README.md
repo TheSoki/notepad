@@ -10,11 +10,11 @@ Notepad app with JWT login system.
 - [Tailwind CSS](https://tailwindcss.com)
 - [Express](https://expressjs.com)
 
-## To do
+## Maybe in future to do
 
 - [ ] Save notes and credentials to db
 - [ ] Make tokens environmental variables
-- [ ] Create page for notes, their visualization and editation
+- [ ] Add modal for changing content of note
 - [ ] Save JWT as cookie
 
 ## License

@@ -5,8 +5,9 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        almost_white: '#F8F8F8',
+        almost_white: '#f8f8f8',
         salmon_fish: '#ffc3a0',
+        newspaper_like: '#ededed',
       },
     },
     screens: {

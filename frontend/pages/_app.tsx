@@ -16,7 +16,7 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
   return (
     <>
       <Head>
-        <title>Notepad</title>
+        <title>notepad</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
