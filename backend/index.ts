@@ -129,6 +129,37 @@ app.post('/logout', (req: any, res: any) => {
   res.sendStatus(204)
 })
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+app.post('/register', (req: any, res: any) => {
+  const username = req.body.username
+  const password = req.body.password
+
+  LoginSchema.isValid({
+    username: req.body.username,
+    password: req.body.password,
+  })
+    .then((valid: boolean) => {
+      if (valid) {
+        if (notes.filter((note) => note.username === username).length === 0) {
+          notes.push({
+            username: username,
+            password: password,
+            notes: [],
+          })
+
+          res.sendStatus(200)
+        } else {
+          res.sendStatus(401)
+        }
+      } else {
+        res.sendStatus(400)
+      }
+    })
+    .catch(() => {
+      res.sendStatus(400)
+    })
+})
+
 app.listen(port, () => {
   console.log(`Server running at port ${port}`)
 })

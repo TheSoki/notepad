@@ -1,7 +1,6 @@
-import React, { useContext, useState } from 'react'
+import React, { useState } from 'react'
 import { Field, Formik, Form } from 'formik'
 import axios from 'axios'
-import { TokenContext } from '../../../pages/_app'
 import Input from '@material-ui/core/Input'
 import InputLabel from '@material-ui/core/InputLabel'
 import FormControl from '@material-ui/core/FormControl'
@@ -10,6 +9,7 @@ import Visibility from '@material-ui/icons/Visibility'
 import VisibilityOff from '@material-ui/icons/VisibilityOff'
 import IconButton from '@material-ui/core/IconButton'
 import * as Yup from 'yup'
+import { mixed } from 'yup'
 import Link from 'next/link'
 
 export const LoginSchema = Yup.object().shape({
@@ -21,16 +21,22 @@ export const LoginSchema = Yup.object().shape({
     .min(4, 'Too short!')
     .max(64, 'Too long!')
     .required('Mandatory'),
+  confirmpassword: mixed().test(
+    'match',
+    'Passwords do not match!',
+    function () {
+      return this.parent.password === this.parent.confirmpassword
+    },
+  ),
 })
 
-const Login = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [tokens, setTokens] = useContext(TokenContext)
-  const [logged, setLogged] = useState(false)
+const Register = () => {
+  const [registered, setRegistered] = useState(false)
 
   const InputFields = [
     { name: 'username', label: 'Username' },
     { name: 'password', label: 'Password' },
+    { name: 'confirmpassword', label: 'Confirm password' },
   ]
   const [showPassword, setShowPassword] = useState(false)
 
@@ -40,26 +46,24 @@ const Login = () => {
         initialValues={{
           username: '',
           password: '',
+          confirmpassword: '',
         }}
         validationSchema={LoginSchema}
         onSubmit={(values, { resetForm }) => {
           axios({
             method: 'post',
-            url: `http://localhost:5000/login`,
+            url: `http://localhost:5000/register`,
             data: {
-              ...values,
+              username: values.username,
+              password: values.password,
             },
           })
-            .then((res) => {
+            .then(() => {
               resetForm()
-              setTokens({
-                accessToken: res.data.accessToken,
-                refreshToken: res.data.refreshToken,
-              })
-              setLogged(true)
+              setRegistered(true)
             })
             .catch(() => {
-              setLogged(false)
+              setRegistered(false)
               alert('Bad request!')
             })
         }}
@@ -75,7 +79,7 @@ const Login = () => {
             className="mx-auto flex flex-wrap flex-col items-center"
           >
             {InputFields.map((singleInputField, id) =>
-              singleInputField.name !== 'password' ? (
+              singleInputField.name === 'username' ? (
                 <Field name={singleInputField.name} key={id}>
                   {({ field, meta }) => (
                     <>
@@ -140,7 +144,7 @@ const Login = () => {
             <button
               type="submit"
               style={{
-                background: !logged
+                background: !registered
                   ? 'linear-gradient(90deg, #ffafbd, #ffc3a0)'
                   : 'green',
                 height: 30,
@@ -148,28 +152,16 @@ const Login = () => {
                 border: 'none',
                 outline: 'none',
               }}
-              className="text-white rounded mt-4"
+              className="text-white rounded mt-4 mb-8"
             >
-              {!logged ? 'Log in' : '✓'}
+              {!registered ? 'Register' : '✓'}
             </button>
 
-            <p className="my-4">or</p>
-
-            <button
-              type="button"
-              style={{
-                background: 'linear-gradient(90deg, #ffafbd, #ffc3a0)',
-                height: 30,
-                width: 120,
-                border: 'none',
-                outline: 'none',
-              }}
-              className="text-white rounded mt-4"
-            >
-              <Link href="/register">
-                <a>Register</a>
+            {registered && (
+              <Link href="/">
+                <a>You can log in now</a>
               </Link>
-            </button>
+            )}
           </Form>
         )}
       </Formik>
@@ -177,4 +169,4 @@ const Login = () => {
   )
 }
 
-export default Login
+export default Register
