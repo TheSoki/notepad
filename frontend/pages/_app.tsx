@@ -1,17 +1,14 @@
-import React, { useState, createContext } from 'react'
+import React from 'react'
 import type { AppProps } from 'next/app'
 import '../src/styles/globals.css'
 import Head from 'next/head'
 import Link from 'next/link'
 import axios from 'axios'
-
-export const TokenContext = createContext(null)
+import { CookiesProvider, useCookies } from 'react-cookie'
 
 const MyApp = ({ Component, pageProps }: AppProps) => {
-  const [tokens, setTokens] = useState({
-    accessToken: null,
-    refreshToken: null,
-  })
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [cookies, setCookie, removeCookie] = useCookies()
 
   return (
     <>
@@ -20,7 +17,7 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <TokenContext.Provider value={[tokens, setTokens]}>
+      <CookiesProvider>
         <div className="bg-almost_white">
           <div className="flex min-h-screen flex-col max-w-screen-desktop mx-auto">
             <header className="p-2">
@@ -34,25 +31,29 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
                   notes
                 </a>
               </Link>
+
               <button
                 style={{ outline: 'none', border: 'none' }}
                 className="float-right"
                 onClick={() => {
-                  console.log(tokens.refreshToken)
                   axios({
                     method: 'post',
                     url: `http://localhost:5000/logout`,
                     data: {
-                      token: tokens.refreshToken,
+                      token: cookies['refreshToken']?.refreshToken,
                     },
                   })
-                    .then(() =>
-                      setTokens({
-                        accessToken: null,
-                        refreshToken: null,
-                      }),
-                    )
-                    .catch(() => alert('Bad request!'))
+                    .then(() => {
+                      removeCookie('accessToken', {
+                        path: '/',
+                      })
+                      removeCookie('refreshToken', {
+                        path: '/',
+                      })
+                    })
+                    .catch(() => {
+                      alert('Bad request!')
+                    })
                 }}
               >
                 <a className="mr-4 hover:text-salmon_fish border-almost_white hover:border-salmon_fish border-solid border-b-2">
@@ -70,7 +71,7 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
             </footer>
           </div>
         </div>
-      </TokenContext.Provider>
+      </CookiesProvider>
     </>
   )
 }

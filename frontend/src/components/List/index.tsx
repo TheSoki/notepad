@@ -1,10 +1,10 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import axios from 'axios'
-import { TokenContext } from '../../../pages/_app'
 import Modal from '@material-ui/core/Modal'
 import { Field, Form, Formik } from 'formik'
 import * as Yup from 'yup'
 import { FormControl, Input, InputLabel } from '@material-ui/core'
+import { useCookies } from 'react-cookie'
 
 const NoteSchema = Yup.object().shape({
   title: Yup.string().max(64, 'Too long!'),
@@ -12,8 +12,8 @@ const NoteSchema = Yup.object().shape({
 })
 
 const List = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [tokens, setTokens] = useContext(TokenContext)
+  const [cookies, setCookie] = useCookies(['accessToken'])
+
   const [data, setData] = useState({
     state: 'loading',
     payload: null,
@@ -29,7 +29,7 @@ const List = () => {
     axios({
       method: 'get',
       url: `http://localhost:5000/notes`,
-      headers: { Authorization: `Bearer ${tokens.accessToken}` },
+      headers: { Authorization: `Bearer ${cookies.accessToken}` },
     })
       .then((res) => {
         setData({
@@ -42,15 +42,14 @@ const List = () => {
           method: 'post',
           url: `http://localhost:5000/token`,
           data: {
-            token: tokens.refreshToken,
+            token: cookies.refreshToken,
           },
         })
           .then((res) => {
             const newAccessToken = res.data.accessToken
 
-            setTokens({
-              accessToken: newAccessToken,
-              refreshToken: tokens.refreshToken,
+            setCookie('accessToken', newAccessToken, {
+              path: '/',
             })
 
             axios({
@@ -169,7 +168,7 @@ const List = () => {
                   axios({
                     method: 'post',
                     url: `http://localhost:5000/addnote`,
-                    headers: { Authorization: `Bearer ${tokens.accessToken}` },
+                    headers: { Authorization: `Bearer ${cookies.accessToken}` },
                     data: {
                       username: data.payload.notes[0].username,
                       password: data.payload.notes[0].password,
@@ -330,7 +329,7 @@ const List = () => {
                   axios({
                     method: 'post',
                     url: `http://localhost:5000/deletenote`,
-                    headers: { Authorization: `Bearer ${tokens.accessToken}` },
+                    headers: { Authorization: `Bearer ${cookies.accessToken}` },
                     data: {
                       username: data.payload.notes[0].username,
                       password: data.payload.notes[0].password,

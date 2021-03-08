@@ -1,7 +1,6 @@
-import React, { useContext, useState } from 'react'
+import React, { useState } from 'react'
 import { Field, Formik, Form } from 'formik'
 import axios from 'axios'
-import { TokenContext } from '../../../pages/_app'
 import Input from '@material-ui/core/Input'
 import InputLabel from '@material-ui/core/InputLabel'
 import FormControl from '@material-ui/core/FormControl'
@@ -11,6 +10,7 @@ import VisibilityOff from '@material-ui/icons/VisibilityOff'
 import IconButton from '@material-ui/core/IconButton'
 import * as Yup from 'yup'
 import Link from 'next/link'
+import { useCookies } from 'react-cookie'
 
 export const LoginSchema = Yup.object().shape({
   username: Yup.string()
@@ -25,7 +25,7 @@ export const LoginSchema = Yup.object().shape({
 
 const Login = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [tokens, setTokens] = useContext(TokenContext)
+  const [cookies, setCookie] = useCookies()
   const [logged, setLogged] = useState(false)
 
   const InputFields = [
@@ -52,10 +52,13 @@ const Login = () => {
           })
             .then((res) => {
               resetForm()
-              setTokens({
-                accessToken: res.data.accessToken,
-                refreshToken: res.data.refreshToken,
+              setCookie('accessToken', res.data.accessToken, {
+                path: '/',
               })
+              setCookie('refreshToken', res.data.refreshToken, {
+                path: '/',
+              })
+
               setLogged(true)
             })
             .catch(() => {

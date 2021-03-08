@@ -15,7 +15,6 @@ Notepad app with JWT login system.
 - [ ] Save notes and credentials to db
 - [ ] Make validation tokens in backend environmental variables
 - [ ] Add modal for changing content of note
-- [ ] Save JWT as cookie
 
 ## License
 
